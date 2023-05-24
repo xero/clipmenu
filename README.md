@@ -1,9 +1,7 @@
-clipmenu is a simple clipboard manager using [dmenu][] (or [rofi][] with
-`CM_LAUNCHER=rofi`) and [xsel][].
+### THIS IS MY PERSONAL FORK OF CLIPMENU
 
-# Demo
 
-![Demo](https://cloud.githubusercontent.com/assets/660663/24079784/6f76da94-0c88-11e7-8251-40b1f02ebf3c.gif)
+clipmenu is a simple clipboard manager using [fzf][] and [xsel][].
 
 # Usage
 
@@ -20,15 +18,23 @@ clipmenud:
 
     systemctl --user import-environment DISPLAY
 
+if you're in a headless environment you need to create a "fake" xorg server for
+[xsel][] to communicate with. i suggest using [xvfb][]. put something like this
+in your shell init (e.g. `~/.zlogin` or `~/.bash_login`):
+
+    if ! pgrep -x "Xvfb" >/dev/null; then
+        export DISPLAY=:0
+        Xvfb :0 -screen 0 1x1x8 &
+        systemctl --user import-environment DISPLAY
+        systemctl --user restart clipmenud.service
+    fi
+
 ## clipmenu
 
-You may wish to bind a shortcut in your window manager to launch `clipmenu`.
+this fork of clipmenu uses [fzf][] exclusivly. you can use it's environment vars
+to setup the fzf style to your liking. i personally have the following set in my env:
 
-All args passed to clipmenu are transparently dispatched to dmenu. That is, if
-you usually call dmenu with args to set colours and other properties, you can
-invoke clipmenu in exactly the same way to get the same effect, like so:
-
-    clipmenu -i -fn Terminus:size=8 -nb '#002b36' -nf '#839496' -sb '#073642' -sf '#93a1a1'
+    export FZF_DEFAULT_OPTS=$FZF_DEFAULT_OPTS' --color=fg:#c1c1c1,bg:#2b2b2b,hl:#5f8787 --color=fg+:#ffffff,bg+:#1c1c1c,hl+:#3ea3a3 --color=info:#87875f,prompt:#87875f,pointer:#8787af --color=marker:#8787af,spinner:#8787af,header:#5f8787 --color=gutter:#2b2b2b,border:#222222 --padding=1 --prompt=❯ --marker=❯ --pointer=❯ --reverse'
 
 For a full list of environment variables that clipmenud can take, please see
 `clipmenud --help`.
@@ -53,26 +59,18 @@ file.
 
 # Supported launchers
 
-Any dmenu-compliant application will work, but here are `CM_LAUNCHER`
-configurations that are known to work:
-
-- `dmenu` (the default)
-- `fzf`
-- `rofi`
-- `rofi-script`, for [rofi's script
-  mode](https://github.com/davatorium/rofi-scripts/tree/master/mode-scripts)
-
-# Installation
-
-Several distributions, including Arch and Nix, provide clipmenu as an official
-package called `clipmenu`.
+this fork is designed to only work with `CM_LAUNCHER` set to `fzf` (default)
 
 ## Manual installation
 
-If your distribution doesn't provide a package, you can manually install using
-`make install` (or better yet, create a package for your distribution!). You
-will need `xsel` and `clipnotify` installed, and also `dmenu` unless you plan
-to use a different launcher.
+install bins then `re{load,start}` the systemd unit
+
+    make install
+    systemctl --user daemon-reload
+    systemctl --user restart clipmenud.service
+
+`clipmenud` uses [clipnotify](https://github.com/cdown/clipnotify)
+You will also need `fzf` and `xsel` installed.
 
 # How does it work?
 
@@ -89,10 +87,10 @@ it should be fairly self-explanatory. However, at the most basic level:
 ## clipmenu
 
 1. `clipmenu` reads the index to find all available clips.
-2. `dmenu` is executed to allow the user to select a clip.
+2. `fzf` is executed to allow the user to select a clip.
 3. After selection, the clip is put onto the PRIMARY and CLIPBOARD X
-   selections.
+   selections. or stdout using the `CM_OUTPUT_CLIP=1` environment var.
 
-[dmenu]: http://tools.suckless.org/dmenu/
-[rofi]: https://github.com/DaveDavenport/Rofi
+[fzf]: https://github.com/junegunn/fzf 
 [xsel]: http://www.vergenet.net/~conrad/software/xsel/
+[xvfb]: https://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml
