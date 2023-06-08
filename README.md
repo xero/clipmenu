@@ -5,23 +5,23 @@ clipmenu is a simple clipboard manager using [fzf][] and [xsel][].
 
 ## Installation
 
-clone the repo with submodules
+`clipmenud` uses [clipnotify](https://github.com/cdown/clipnotify), which is provided 
+with this repo as a submodule. You will also need [fzf][] and [xsel][] installed.
+
+clone the repo with submodules:
 
     git clone --recurse-submodules git@github.com:xero/clipmenu.git
     cd clipmenu
 
-`clipmenud` uses [clipnotify](https://github.com/cdown/clipnotify), which is provided 
-with this repo as a submodule. You will also need [fzf][] and [xsel][] installed.
-
-first build clipnotify:
+build clipnotify, then the clipmenu bins:
 
     cd clipnotify
     make && make install
     cd ..
-
-then install bins then `re{load,start}` the systemd unit
-
     make install
+
+finally `re{load,start}` the systemd unit:
+
     systemctl --user daemon-reload
     systemctl --user restart clipmenud.service
 
@@ -102,6 +102,11 @@ it should be fairly self-explanatory. However, at the most basic level:
 3. After selection, the clip is put onto the PRIMARY and CLIPBOARD X
    selections. or stdout using the `CM_OUTPUT_CLIP=1` environment var.
 
+# example
+
+checkout my [dotfiles][] repo to see it in action.
+
 [fzf]: https://github.com/junegunn/fzf 
 [xsel]: http://www.vergenet.net/~conrad/software/xsel/
 [xvfb]: https://www.x.org/releases/X11R7.6/doc/man/man1/Xvfb.1.xhtml
+[dotfiles]: https://git.io/.files
